@@ -1,6 +1,7 @@
 using System;
 using Mirror;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Game.Scripts
 {
@@ -9,6 +10,7 @@ namespace Game.Scripts
     public class PlayerInteraction : NetworkBehaviour
     {
         [SerializeField] private ParticleSystem muzzleFlashParticles;
+        [SerializeField] private AudioSource fireAudioSource;
         [SerializeField] private float weaponIdleBobPeriod = 1f;
         [SerializeField] private float weaponMovingBobPeriod = 1f;
         [SerializeField] private float weaponSprintingBobMultiplier = 1.2f;
@@ -35,11 +37,12 @@ namespace Game.Scripts
             playerMovement = GetComponent<PlayerMovement>();
 
             Transform view = GameObject.Find("View").transform;
-        
-            weaponTransform = view.Find("Weapon").transform;
+
+            weaponTransform = view.Find("Weapon");
             weaponPos = weaponTransform.position;
 
             muzzleFlashParticles = view.Find("MuzzleFlashParticles").GetComponent<ParticleSystem>();
+            fireAudioSource = weaponTransform.gameObject.GetComponent<AudioSource>();
         }
 
         private void Update()
@@ -80,6 +83,8 @@ namespace Game.Scripts
         private void RpcFire()
         {
             muzzleFlashParticles.Play();
+            fireAudioSource.pitch = Random.Range(0.9f, 1.0f);
+            fireAudioSource.Play();
         }
     }
 }
