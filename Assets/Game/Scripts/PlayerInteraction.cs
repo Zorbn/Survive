@@ -9,7 +9,10 @@ namespace Game.Scripts
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerInteraction : NetworkBehaviour
     {
+        private const float HitAudioDelay = 0.2f;
+        
         [SerializeField] private ParticleSystem muzzleFlashParticles;
+        [SerializeField] private AudioSource hitAudioSource;
         [SerializeField] private AudioSource fireAudioSource;
         [SerializeField] private float weaponIdleBobPeriod = 1f;
         [SerializeField] private float weaponMovingBobPeriod = 1f;
@@ -39,7 +42,7 @@ namespace Game.Scripts
             Transform view = GameObject.Find("View").transform;
 
             weaponTransform = view.Find("Weapon");
-            weaponPos = weaponTransform.position;
+            weaponPos = weaponTransform.localPosition;
 
             muzzleFlashParticles = view.Find("MuzzleFlashParticles").GetComponent<ParticleSystem>();
             fireAudioSource = weaponTransform.gameObject.GetComponent<AudioSource>();
@@ -53,10 +56,10 @@ namespace Game.Scripts
             if (playerMovement.isSprinting) weaponBobPeriod *= weaponSprintingBobMultiplier;
             
             bobTime += Time.deltaTime * weaponBobPeriod;
-            weaponTransform.position = weaponPos + new Vector3(0f,
+            weaponTransform.localPosition = weaponPos + new Vector3(0f,
                 Mathf.Sin(bobTime) * weaponBobAmplitude - recoil * weapon.recoilVertDistance,
                 -recoil * weapon.recoilDistance);
-            weaponTransform.rotation = Quaternion.Euler(recoil * weapon.recoilAngle, 180f, 0f);
+            weaponTransform.localRotation = Quaternion.Euler(recoil * weapon.recoilAngle, 180f, 0f);
 
             recoil = Mathf.Max(recoil - Time.deltaTime * weapon.recoilSpeed, 0f);
 
@@ -74,6 +77,8 @@ namespace Game.Scripts
             if (!Physics.Raycast(camPosition, camDirection, out RaycastHit hit,
                     weapon.attackRange)) return;
             if (!hit.collider.CompareTag("Enemy")) return;
+            
+            TargetHit(netIdentity.connectionToClient);
 
             var health = hit.collider.GetComponent<IHealth>();
             health.TakeDamage(weapon.attackDamage);
@@ -85,6 +90,12 @@ namespace Game.Scripts
             muzzleFlashParticles.Play();
             fireAudioSource.pitch = Random.Range(0.9f, 1.0f);
             fireAudioSource.Play();
+        }
+        
+        [TargetRpc]
+        private void TargetHit(NetworkConnection targetConnection)
+        {
+            hitAudioSource.PlayDelayed(fireAudioSource.clip.length * HitAudioDelay);
         }
     }
 }
