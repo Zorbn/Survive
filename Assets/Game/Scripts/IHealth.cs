@@ -4,6 +4,6 @@
     {
         public const int DefaultMaxHealth = 100;
 
-        public void TakeDamage(int damage);
+        public bool TakeDamage(int damage);
     }
 }

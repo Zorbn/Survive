@@ -17,12 +17,12 @@ namespace Game.Scripts
             playerTransform = transform;
         }
 
-        public void TakeDamage(int damage)
+        public bool TakeDamage(int damage)
         {
             if (!isServer) throw new MethodAccessException("Cannot call TakeDamage on a client!");
             
-            LocalTakeDamage(damage);
             RpcTakeDamage(damage);
+            return LocalTakeDamage(damage);
         }
 
         [ClientRpc]
@@ -39,7 +39,7 @@ namespace Game.Scripts
             CmdRespawn();
         }
 
-        private void LocalTakeDamage(int damage)
+        private bool LocalTakeDamage(int damage)
         {
             health -= damage;
             
@@ -50,6 +50,8 @@ namespace Game.Scripts
             };
 
             HitParticles.Emit(emitParams, 5);
+
+            return health <= 0;
         }
 
         [Command]

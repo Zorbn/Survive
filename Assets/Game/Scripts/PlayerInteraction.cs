@@ -13,6 +13,7 @@ namespace Game.Scripts
         
         [SerializeField] private ParticleSystem muzzleFlashParticles;
         [SerializeField] private AudioSource hitAudioSource;
+        [SerializeField] private AudioSource killAudioSource;
         [SerializeField] private AudioSource fireAudioSource;
         [SerializeField] private float weaponIdleBobPeriod = 1f;
         [SerializeField] private float weaponMovingBobPeriod = 1f;
@@ -78,10 +79,19 @@ namespace Game.Scripts
                     weapon.attackRange)) return;
             if (!hit.collider.CompareTag("Enemy")) return;
             
-            TargetHit(netIdentity.connectionToClient);
 
             var health = hit.collider.GetComponent<IHealth>();
-            health.TakeDamage(weapon.attackDamage);
+            
+            if (health.TakeDamage(weapon.attackDamage))
+            {
+                // Killed enemy.
+                TargetKillFx(netIdentity.connectionToClient);
+            }
+            else
+            {
+                // Damaged enemy, but it didn't die.
+                TargetHitFx(netIdentity.connectionToClient);
+            }
         }
 
         [ClientRpc]
@@ -93,9 +103,17 @@ namespace Game.Scripts
         }
         
         [TargetRpc]
-        private void TargetHit(NetworkConnection targetConnection)
+        // ReSharper disable once UnusedParameter.Local
+        private void TargetHitFx(NetworkConnection targetConnection)
         {
             hitAudioSource.PlayDelayed(fireAudioSource.clip.length * HitAudioDelay);
+        }
+        
+        [TargetRpc]
+        // ReSharper disable once UnusedParameter.Local
+        private void TargetKillFx(NetworkConnection targetConnection)
+        {
+            killAudioSource.PlayDelayed(fireAudioSource.clip.length * HitAudioDelay);
         }
     }
 }

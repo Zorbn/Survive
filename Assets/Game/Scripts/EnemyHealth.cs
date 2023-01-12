@@ -17,14 +17,20 @@ namespace Game.Scripts
             enemyTransform = transform;
         }
 
-        public void TakeDamage(int damage)
+        public bool TakeDamage(int damage)
         {
             if (!isServer) throw new MethodAccessException("Cannot call TakeDamage on a client!");
             
             LocalTakeDamage(damage);
             RpcTakeDamage(damage);
-            
-            if (health <= 0) NetworkServer.Destroy(gameObject);
+
+            if (health <= 0)
+            {
+                NetworkServer.Destroy(gameObject);
+                return true;
+            }
+
+            return false;
         }
 
         [ClientRpc]
