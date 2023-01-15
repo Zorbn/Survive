@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 1669658795057171302}
   - component: {fileID: 4485107994579603796}
   - component: {fileID: 4573052268286620869}
+  - component: {fileID: 4880514215854846153}
   - component: {fileID: 1435756430689269390}
   - component: {fileID: 8574294949295007794}
   - component: {fileID: 1871125673736489794}
@@ -183,6 +184,21 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   health: 100
+--- !u!114 &4880514215854846153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1330767045050820433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ac640ea79214cac841132d077cc14f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buildingParts:
+  - {fileID: 636306184669540850, guid: 76342bffed859af489682e34d3ab46e5, type: 3}
+  - {fileID: 8885226494619500662, guid: 1c5d20ae0cdf2c349bf42cdfbf86719c, type: 3}
 --- !u!54 &1435756430689269390
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -211,7 +227,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: b3a7bf52cdecb434fbe149d788655e50, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 0
   Mute: 0

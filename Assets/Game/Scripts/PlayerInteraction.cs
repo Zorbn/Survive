@@ -102,15 +102,13 @@ namespace Game.Scripts
             fireAudioSource.Play();
         }
         
-        [TargetRpc]
-        // ReSharper disable once UnusedParameter.Local
+        [TargetRpc] // ReSharper disable once UnusedParameter.Local
         private void TargetHitFx(NetworkConnection targetConnection)
         {
             hitAudioSource.PlayDelayed(fireAudioSource.clip.length * HitAudioDelay);
         }
         
-        [TargetRpc]
-        // ReSharper disable once UnusedParameter.Local
+        [TargetRpc] // ReSharper disable once UnusedParameter.Local
         private void TargetKillFx(NetworkConnection targetConnection)
         {
             killAudioSource.PlayDelayed(fireAudioSource.clip.length * HitAudioDelay);

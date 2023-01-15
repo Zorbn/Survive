@@ -669,7 +669,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 183
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -901,7 +901,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43f174e6cc1baa2478fe0b55e904d08f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  volume: 0.1
+  volume: 0.05
 --- !u!114 &1244076793
 MonoBehaviour:
   m_ObjectHideFlags: 0
