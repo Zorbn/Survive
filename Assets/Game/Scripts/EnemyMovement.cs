@@ -1,10 +1,10 @@
 using Mirror;
+using Pathfinding;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace Game.Scripts
 {
-    [RequireComponent(typeof(NavMeshAgent))]
+    [RequireComponent(typeof(AIPath))]
     [RequireComponent(typeof(Rigidbody))]
     public class EnemyMovement : NetworkBehaviour
     {
@@ -13,10 +13,10 @@ namespace Game.Scripts
         
         [SerializeField] private float moveSpeed = 8f;
         [SerializeField] private float stopRange = 2f;
-        [SerializeField] private float accelerationMultiplier = 4f;
         [SerializeField] private float attackCooldown = 1f;
+        [SerializeField] private int damage = 20;
 
-        private NavMeshAgent navMeshAgent;
+        private AIPath aiPath;
         private GameNetworkManager networkManager;
         private Transform nearestPlayer;
         private Transform enemyTransform;
@@ -27,9 +27,9 @@ namespace Game.Scripts
         {
             networkManager = GameObject.Find("NetworkManager").GetComponent<GameNetworkManager>();
             enemyTransform = transform;
-            navMeshAgent = GetComponent<NavMeshAgent>();
-            navMeshAgent.stoppingDistance = stopRange;
-            navMeshAgent.acceleration = moveSpeed * accelerationMultiplier;
+            aiPath = GetComponent<AIPath>();
+            aiPath.endReachedDistance = stopRange;
+            aiPath.maxSpeed = moveSpeed;
         }
 
         private void FixedUpdate()
@@ -62,7 +62,7 @@ namespace Game.Scripts
 
             if (!nearestPlayer) return;
             
-            navMeshAgent.destination = nearestPlayer.position;
+            aiPath.destination = nearestPlayer.position;
         }
 
         private void FindNearestPlayer()
@@ -81,7 +81,7 @@ namespace Game.Scripts
         private void Attack()
         {
             var health = nearestPlayer.GetComponent<IHealth>();
-            health.TakeDamage(20);
+            health.TakeDamage(damage);
         }
     }
 }
