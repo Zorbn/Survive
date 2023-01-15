@@ -4,17 +4,20 @@ using UnityEngine;
 
 namespace Game.Scripts
 {
+    [RequireComponent(typeof(CapsuleCollider))]
     public class EnemyHealth : NetworkBehaviour, IHealth
     {
         [SerializeField] private int health = IHealth.DefaultMaxHealth;
 
         private Transform enemyTransform;
+        private CapsuleCollider capsuleCollider;
         private static ParticleSystem HitParticles;
 
         private void Start()
         {
             if (!HitParticles) HitParticles = GameObject.Find("BloodParticles").GetComponent<ParticleSystem>();
             enemyTransform = transform;
+            capsuleCollider = GetComponent<CapsuleCollider>();
         }
 
         public bool TakeDamage(int damage)
@@ -47,7 +50,7 @@ namespace Game.Scripts
             
             var emitParams = new ParticleSystem.EmitParams
             {
-                position = enemyTransform.position,
+                position = enemyTransform.position + capsuleCollider.center,
                 applyShapeToPosition = true
             };
 

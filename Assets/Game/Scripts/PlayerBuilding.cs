@@ -11,21 +11,34 @@ namespace Game.Scripts
         public GameObject[] buildingParts;
         private int selectedPartIndex;
         private static int BuildingMask;
+        private static int BuildOnMask;
 
         private Camera cam;
 
         private void Start()
         {
             cam = Camera.main;
-            BuildingMask = LayerMask.GetMask("Building");
+            
+            if (BuildingMask == 0) BuildingMask = LayerMask.GetMask("Building");
+            if (BuildOnMask == 0) BuildOnMask = LayerMask.GetMask("Building", "Ground", "Obstacle");
         }
 
         private void Update()
         {
             if (Input.GetButtonDown("Fire2"))
             {
-                // TODO: Check to make sure the new building part won't intersect existing ones.
                 PlacePart();
+            }
+
+            if (Input.GetButtonDown("Fire3"))
+            {
+                if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, BuildRange))
+                {
+                    if (hit.collider.CompareTag("Building"))
+                    {
+                        Destroy(hit.collider.gameObject);
+                    }
+                }
             }
 
             if (Input.GetButtonDown("Jump"))
@@ -36,13 +49,13 @@ namespace Game.Scripts
 
         private void PlacePart()
         {
-            if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, BuildRange))
+            if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, BuildRange, BuildOnMask))
             {
                 GameObject selectedPart = buildingParts[selectedPartIndex];
 
                 if (hit.collider.CompareTag("Building"))
                 {
-                    SnapPart(selectedPart, hit.point, hit.collider.gameObject);
+                    SnapPart(selectedPart, hit.point, hit.normal, hit.collider.gameObject);
                     return;
                 }
                 
@@ -50,7 +63,7 @@ namespace Game.Scripts
             }
         }
 
-        private void SnapPart(GameObject selectedPart, Vector3 targetPos, GameObject snapObject)
+        private void SnapPart(GameObject selectedPart, Vector3 targetPos, Vector3 targetNormal, GameObject snapObject)
         {
             Transform snapTransform = snapObject.transform;
             Vector3 snapCenter = snapTransform.position;
@@ -85,7 +98,14 @@ namespace Game.Scripts
             
             Vector3 snapPos = snapCenter + snapObject.transform.rotation * spawnOffset;
             snapPoints = selectedPart.GetComponent<BuildingPart>().SnapPointSet;
-            snapPos -= snapRotation * snapPoints.root;
+            Vector3 root = snapPoints.root;
+
+            if (targetNormal.y < 0f)
+            {
+                root.y *= -1f;
+            }
+            
+            snapPos -= snapRotation * root;
 
             if (Physics.CheckBox(snapPos, GetExtents(selectedPart) * SnapCollisionPadding, snapRotation, BuildingMask)) return;
             

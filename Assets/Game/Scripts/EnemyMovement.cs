@@ -6,6 +6,7 @@ namespace Game.Scripts
 {
     [RequireComponent(typeof(AIPath))]
     [RequireComponent(typeof(Rigidbody))]
+    [RequireComponent(typeof(CapsuleCollider))]
     public class EnemyMovement : NetworkBehaviour
     {
         private const float AttackRangeMultiplier = 1.1f;
@@ -17,24 +18,37 @@ namespace Game.Scripts
         [SerializeField] private int damage = 20;
 
         private AIPath aiPath;
+        private Vector3 buildingCheckExtents;
         private GameNetworkManager networkManager;
         private Transform nearestPlayer;
         private Transform enemyTransform;
         private float attackTimer;
         private float pathingUpdateTimer;
+
+        private static int BuildingMask;
+        private CapsuleCollider capsuleCollider;
+        private readonly Collider[] nearbyBuildingParts = new Collider[1];
         
         private void Start()
         {
             networkManager = GameObject.Find("NetworkManager").GetComponent<GameNetworkManager>();
             enemyTransform = transform;
+            
             aiPath = GetComponent<AIPath>();
             aiPath.endReachedDistance = stopRange;
             aiPath.maxSpeed = moveSpeed;
+            
+            capsuleCollider = GetComponent<CapsuleCollider>();
+            buildingCheckExtents = Vector3.one * capsuleCollider.height * 0.5f;
+            
+            if (BuildingMask == 0) BuildingMask = LayerMask.GetMask("Building");
         }
 
         private void FixedUpdate()
         {
             if (!isServer) return;
+
+            AttackNearbyBuildings();
 
             pathingUpdateTimer -= Time.deltaTime;
 
@@ -82,6 +96,19 @@ namespace Game.Scripts
         {
             var health = nearestPlayer.GetComponent<IHealth>();
             health.TakeDamage(damage);
+        }
+
+        private void AttackNearbyBuildings()
+        {
+            int size = Physics.OverlapBoxNonAlloc(enemyTransform.position + capsuleCollider.center, buildingCheckExtents, nearbyBuildingParts, Quaternion.identity, BuildingMask);
+            
+            if (size == 0)
+            {
+                aiPath.maxSpeed = moveSpeed;
+                return;
+            }
+
+            aiPath.maxSpeed = 0f;
         }
     }
 }
