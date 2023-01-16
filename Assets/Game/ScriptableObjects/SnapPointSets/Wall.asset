@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Wall
   m_EditorClassIdentifier: 
   root: {x: 0, y: -2, z: 0}
+  bounds: {x: 4, y: 4, z: 0.2}
   snapOffsets:
   - {x: 0, y: 2, z: 0.4}
   - {x: 0, y: 2, z: -0.4}

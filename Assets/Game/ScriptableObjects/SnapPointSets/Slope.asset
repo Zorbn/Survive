@@ -10,18 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dff22dac83f541e3abea227c5035c805, type: 3}
-  m_Name: Floor
+  m_Name: Slope
   m_EditorClassIdentifier: 
-  root: {x: 0, y: 0, z: -2}
-  bounds: {x: 4, y: 0.2, z: 4}
+  root: {x: 0, y: -2, z: -2}
+  bounds: {x: 4, y: 4, z: 4}
   snapOffsets:
-  - {x: -2, y: 0, z: 0}
-  - {x: 2, y: 0, z: 0}
-  - {x: 0, y: 0, z: -2}
-  - {x: 0, y: 0, z: 2}
+  - {x: -2, y: -2, z: 0}
+  - {x: 2, y: -2, z: 0}
+  - {x: 0, y: -2, z: -2}
+  - {x: 0, y: -2, z: 2}
+  - {x: 0, y: 2, z: -2}
   spawnOffsets: []
   spawnAngles:
   - 270
   - 90
   - 180
   - 0
+  - 180

@@ -27,13 +27,10 @@ namespace Game.Scripts
             LocalTakeDamage(damage);
             RpcTakeDamage(damage);
 
-            if (health <= 0)
-            {
-                NetworkServer.Destroy(gameObject);
-                return true;
-            }
-
-            return false;
+            if (health > 0) return false;
+            
+            NetworkServer.Destroy(gameObject);
+            return true;
         }
 
         [ClientRpc]

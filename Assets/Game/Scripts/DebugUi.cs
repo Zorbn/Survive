@@ -11,11 +11,6 @@ namespace Game.Scripts
 
         private float updateTimer;
 
-        private void Start()
-        {
-            throw new NotImplementedException();
-        }
-
         private void Update()
         {
             updateTimer -= Time.deltaTime;

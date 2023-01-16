@@ -1,5 +1,4 @@
-﻿using Unity.Mathematics;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Game.Scripts
 {
@@ -10,6 +9,9 @@ namespace Game.Scripts
 
         public GameObject[] buildingParts;
         private int selectedPartIndex;
+        private GameObject selectedPart;
+        private SnapPointSetObject selectedSnapPointSet;
+        
         private static int BuildingMask;
         private static int BuildOnMask;
 
@@ -21,6 +23,8 @@ namespace Game.Scripts
             
             if (BuildingMask == 0) BuildingMask = LayerMask.GetMask("Building");
             if (BuildOnMask == 0) BuildOnMask = LayerMask.GetMask("Building", "Ground", "Obstacle");
+            
+            UpdateSelectedPart(0);
         }
 
         private void Update()
@@ -32,42 +36,42 @@ namespace Game.Scripts
 
             if (Input.GetButtonDown("Fire3"))
             {
-                if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, BuildRange))
-                {
-                    if (hit.collider.CompareTag("Building"))
-                    {
-                        Destroy(hit.collider.gameObject);
-                    }
-                }
+                RemovePart();
             }
 
             if (Input.GetButtonDown("Jump"))
             {
-                selectedPartIndex = (selectedPartIndex + 1) % buildingParts.Length;
+                UpdateSelectedPart();
             }
+        }
+
+        private void RemovePart()
+        {
+            if (!Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, BuildRange)) return;
+            if (!hit.collider.CompareTag("Building")) return;
+            
+            Destroy(hit.collider.gameObject);
         }
 
         private void PlacePart()
         {
-            if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, BuildRange, BuildOnMask))
+            if (!Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, BuildRange,
+                    BuildOnMask)) return;
+            
+            if (hit.collider.CompareTag("Building"))
             {
-                GameObject selectedPart = buildingParts[selectedPartIndex];
-
-                if (hit.collider.CompareTag("Building"))
-                {
-                    SnapPart(selectedPart, hit.point, hit.normal, hit.collider.gameObject);
-                    return;
-                }
-                
-                SpawnPart(selectedPart, hit.point);
+                SnapPart(hit.point, hit.normal, hit.collider.gameObject);
+                return;
             }
+                
+            SpawnPart(hit.point);
         }
 
-        private void SnapPart(GameObject selectedPart, Vector3 targetPos, Vector3 targetNormal, GameObject snapObject)
+        private void SnapPart(Vector3 targetPos, Vector3 targetNormal, GameObject snapObject)
         {
             Transform snapTransform = snapObject.transform;
             Vector3 snapCenter = snapTransform.position;
-            SnapPointSetObject snapPoints = snapObject.GetComponent<BuildingPart>().SnapPointSet;
+            SnapPointSetObject snapPoints = snapObject.GetComponent<BuildingPart>().snapPointSet;
 
             float minDistance = Mathf.Infinity;
             var minIndex = 0;
@@ -97,8 +101,7 @@ namespace Game.Scripts
             }
             
             Vector3 snapPos = snapCenter + snapObject.transform.rotation * spawnOffset;
-            snapPoints = selectedPart.GetComponent<BuildingPart>().SnapPointSet;
-            Vector3 root = snapPoints.root;
+            Vector3 root = selectedSnapPointSet.root;
 
             if (targetNormal.y < 0f)
             {
@@ -106,26 +109,29 @@ namespace Game.Scripts
             }
             
             snapPos -= snapRotation * root;
-
-            if (Physics.CheckBox(snapPos, GetExtents(selectedPart) * SnapCollisionPadding, snapRotation, BuildingMask)) return;
+            
+            if (Physics.CheckBox(snapPos, GetExtents(selectedSnapPointSet) * SnapCollisionPadding, snapRotation, BuildingMask)) return;
             
             Instantiate(selectedPart, snapPos, snapRotation);
         }
 
-        private void SpawnPart(GameObject selectedPart, Vector3 position)
+        private void SpawnPart(Vector3 position)
         {
-            if (Physics.CheckBox(position, GetExtents(selectedPart), Quaternion.identity, BuildingMask)) return;
-            Instantiate(buildingParts[selectedPartIndex], position, quaternion.identity);
+            if (Physics.CheckBox(position, GetExtents(selectedSnapPointSet), Quaternion.identity, BuildingMask)) return;
+            Instantiate(buildingParts[selectedPartIndex], position, selectedPart.transform.rotation);
         }
 
-        private static Vector3 GetExtents(GameObject part)
+        private static Vector3 GetExtents(SnapPointSetObject snapPointSet)
         {
-            Vector3 projectionExtents = part.GetComponent<MeshFilter>().sharedMesh.bounds.extents;
-            Vector3 projectionScale = part.transform.localScale;
-            projectionExtents.x *= projectionScale.x;
-            projectionExtents.y *= projectionScale.y;
-            projectionExtents.z *= projectionScale.z;
-            return projectionExtents;
+            print(snapPointSet.bounds);
+            return snapPointSet.bounds * 0.5f;
+        }
+
+        private void UpdateSelectedPart(int increment = 1)
+        {
+            selectedPartIndex = (selectedPartIndex + increment) % buildingParts.Length;
+            selectedPart = buildingParts[selectedPartIndex];
+            selectedSnapPointSet = selectedPart.GetComponent<BuildingPart>().snapPointSet;
         }
     }
 }

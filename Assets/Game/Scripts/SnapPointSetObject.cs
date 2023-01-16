@@ -6,6 +6,7 @@ namespace Game.Scripts
     public class SnapPointSetObject : ScriptableObject
     {
         public Vector3 root;
+        public Vector3 bounds;
         public Vector3[] snapOffsets;
         public Vector3[] spawnOffsets;
         public float[] spawnAngles;

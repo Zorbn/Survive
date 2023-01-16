@@ -197,8 +197,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buildingParts:
-  - {fileID: 636306184669540850, guid: 76342bffed859af489682e34d3ab46e5, type: 3}
-  - {fileID: 8885226494619500662, guid: 1c5d20ae0cdf2c349bf42cdfbf86719c, type: 3}
+  - {fileID: 7270039093080142472, guid: 76342bffed859af489682e34d3ab46e5, type: 3}
+  - {fileID: 7668395006586632668, guid: 1c5d20ae0cdf2c349bf42cdfbf86719c, type: 3}
+  - {fileID: 7270039093080142472, guid: 506337ebcbff5a140be3ed0a4f825a8d, type: 3}
 --- !u!54 &1435756430689269390
 Rigidbody:
   m_ObjectHideFlags: 0
