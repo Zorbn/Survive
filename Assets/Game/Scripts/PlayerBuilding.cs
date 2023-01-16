@@ -117,8 +117,9 @@ namespace Game.Scripts
 
         private void SpawnPart(Vector3 position)
         {
-            if (Physics.CheckBox(position, GetExtents(selectedSnapPointSet), Quaternion.identity, BuildingMask)) return;
-            Instantiate(buildingParts[selectedPartIndex], position, selectedPart.transform.rotation);
+            Quaternion rotation = selectedPart.transform.rotation * Quaternion.Euler(0f, cam.transform.eulerAngles.y, 0f);
+            if (Physics.CheckBox(position, GetExtents(selectedSnapPointSet), rotation, BuildingMask)) return;
+            Instantiate(buildingParts[selectedPartIndex], position, rotation);
         }
 
         private static Vector3 GetExtents(SnapPointSetObject snapPointSet)
