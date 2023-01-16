@@ -47,10 +47,11 @@ namespace Game.Scripts
         private void FixedUpdate()
         {
             if (!isServer) return;
+            
+            attackTimer -= Time.deltaTime;
+            pathingUpdateTimer -= Time.deltaTime;
 
             AttackNearbyBuildings();
-
-            pathingUpdateTimer -= Time.deltaTime;
 
             if (pathingUpdateTimer <= 0f)
             {
@@ -60,14 +61,11 @@ namespace Game.Scripts
 
             if (!nearestPlayer) return;
             
-            attackTimer -= Time.deltaTime;
-            
             if (attackTimer > 0f) return;
             if (Vector3.Distance(enemyTransform.position, nearestPlayer.position) >
                 stopRange * AttackRangeMultiplier) return;
             
-            Attack();
-            attackTimer = attackCooldown;
+            Attack(nearestPlayer);
         }
 
         private void UpdatePath()
@@ -92,10 +90,11 @@ namespace Game.Scripts
             }
         }
 
-        private void Attack()
+        private void Attack(Component target)
         {
-            var health = nearestPlayer.GetComponent<IHealth>();
+            var health = target.GetComponent<IHealth>();
             health.TakeDamage(damage);
+            attackTimer = attackCooldown;
         }
 
         private void AttackNearbyBuildings()
@@ -109,6 +108,10 @@ namespace Game.Scripts
             }
 
             aiPath.maxSpeed = 0f;
+            
+            if (attackTimer >= 0f) return;
+            
+            Attack(nearbyBuildingParts[0]);
         }
     }
 }

@@ -67,5 +67,7 @@ namespace Game.Scripts
             
             health = IHealth.DefaultMaxHealth;
         }
+        
+        public int GetHealth() => health;
     }
 }

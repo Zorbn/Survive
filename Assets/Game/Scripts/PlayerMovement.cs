@@ -7,6 +7,9 @@ namespace Game.Scripts
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerMovement : NetworkBehaviour
     {
+        private const float GroundCheckRadius = 0.5f;
+        private const float GroundCheckDistance = 0.8f;
+        
         [SerializeField] private float mouseSensitivity = 2.0f;
         [SerializeField] private float moveSpeed = 400f;
         [SerializeField] private float sprintMultiplier = 1.2f;
@@ -19,7 +22,6 @@ namespace Game.Scripts
         [SerializeField] private float cameraTiltSpeed = 10f;
         [SerializeField] private float cameraFovSpeed = 10f;
 
-        private static readonly Vector3 GroundCheckHalfExtent = new(0f, 0.1f, 0f); 
         private static readonly Vector3 CameraOffset = new(0f, 0.6f, 0f);
 
         private Rigidbody rb;
@@ -40,7 +42,6 @@ namespace Game.Scripts
         public override void OnStartLocalPlayer()
         {
             cam = Camera.main;
-
             if (cam is null) throw new ArgumentNullException(nameof(cam));
 
             camDefaultFov = cam.fieldOfView;
@@ -104,8 +105,7 @@ namespace Game.Scripts
             Vector3 rightVel = playerTransform.right * moveDir.x;
 
             Vector3 centerPos = playerTransform.position;
-            bool onGround = Physics.CapsuleCast(centerPos + GroundCheckHalfExtent, centerPos - GroundCheckHalfExtent, 0.5f,
-                Vector3.down, out RaycastHit hit, 1.25f);
+            bool onGround = Physics.SphereCast(centerPos, GroundCheckRadius, Vector3.down, out RaycastHit hit, GroundCheckDistance);
             
             float currentSpeed = moveSpeed;
 

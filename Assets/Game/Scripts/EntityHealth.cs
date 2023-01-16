@@ -4,20 +4,20 @@ using UnityEngine;
 
 namespace Game.Scripts
 {
-    [RequireComponent(typeof(CapsuleCollider))]
-    public class EnemyHealth : NetworkBehaviour, IHealth
+    public class EntityHealth : NetworkBehaviour, IHealth
     {
         [SerializeField] private int health = IHealth.DefaultMaxHealth;
+        [SerializeField] private string hitParticleName;
+        [SerializeField] private int hitParticleCount;
+        [SerializeField] private Vector3 hitParticleOffset;
 
-        private Transform enemyTransform;
-        private CapsuleCollider capsuleCollider;
-        private static ParticleSystem HitParticles;
+        private Transform entityTransform;
+        private ParticleSystem hitParticles;
 
         private void Start()
         {
-            if (!HitParticles) HitParticles = GameObject.Find("BloodParticles").GetComponent<ParticleSystem>();
-            enemyTransform = transform;
-            capsuleCollider = GetComponent<CapsuleCollider>();
+            hitParticles = GameObject.Find(hitParticleName).GetComponent<ParticleSystem>();
+            entityTransform = transform;
         }
 
         public bool TakeDamage(int damage)
@@ -44,14 +44,27 @@ namespace Game.Scripts
         private void LocalTakeDamage(int damage)
         {
             health -= damage;
+            if (health > 0) EmitParticles();
+        }
+        
+        public int GetHealth() => health;
+        
+        private void OnDestroy()
+        {
+            EmitParticles();
+        }
+
+        private void EmitParticles()
+        {
+            if (!hitParticles) return;
             
             var emitParams = new ParticleSystem.EmitParams
             {
-                position = enemyTransform.position + capsuleCollider.center,
+                position = entityTransform.position + hitParticleOffset,
                 applyShapeToPosition = true
             };
 
-            HitParticles.Emit(emitParams, 5);
+            hitParticles.Emit(emitParams, hitParticleCount);
         }
     }
 }

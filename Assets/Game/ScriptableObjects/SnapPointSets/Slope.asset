@@ -19,11 +19,11 @@ MonoBehaviour:
   - {x: 2, y: -2, z: 0}
   - {x: 0, y: -2, z: -2}
   - {x: 0, y: -2, z: 2}
-  - {x: 0, y: 2, z: -2}
+  - {x: 0, y: 2, z: 2}
   spawnOffsets: []
   spawnAngles:
   - 270
   - 90
   - 180
   - 0
-  - 180
+  - 0
