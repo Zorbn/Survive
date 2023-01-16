@@ -19,7 +19,7 @@ namespace Game.Scripts
         [SerializeField] private float cameraTiltSpeed = 10f;
         [SerializeField] private float cameraFovSpeed = 10f;
 
-        private static readonly Vector3 GroundCheckHalfExtent = new(0.5f, 0.1f, 0.5f); 
+        private static readonly Vector3 GroundCheckHalfExtent = new(0f, 0.1f, 0f); 
         private static readonly Vector3 CameraOffset = new(0f, 0.6f, 0f);
 
         private Rigidbody rb;
@@ -102,15 +102,11 @@ namespace Game.Scripts
         {
             Vector3 forwardVel = playerTransform.forward * moveDir.y;
             Vector3 rightVel = playerTransform.right * moveDir.x;
-            Vector3 velocity = rb.velocity;
-            
-            float yVel = velocity.y;
-            if (tryJump && Physics.BoxCast(playerTransform.position, GroundCheckHalfExtent,
-                    Vector3.down, Quaternion.identity, 1.35f))
-            {
-                yVel = jumpForce;
-            }
 
+            Vector3 centerPos = playerTransform.position;
+            bool onGround = Physics.CapsuleCast(centerPos + GroundCheckHalfExtent, centerPos - GroundCheckHalfExtent, 0.5f,
+                Vector3.down, out RaycastHit hit, 1.25f);
+            
             float currentSpeed = moveSpeed;
 
             if (isSprinting && moveDir.magnitude != 0f)
@@ -122,10 +118,24 @@ namespace Game.Scripts
             {
                 cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, camDefaultFov, cameraFovSpeed * Time.deltaTime);
             }
+
+            Vector3 velocity = Time.deltaTime * currentSpeed * (forwardVel + rightVel);
+            velocity.y = rb.velocity.y;
+            rb.useGravity = true;
             
-            velocity = Time.deltaTime * currentSpeed * (forwardVel + rightVel);
-            velocity = new Vector3(velocity.x, yVel, velocity.z);
-            rb.velocity = velocity;
+            if (onGround)
+            {
+                rb.useGravity = false;
+                velocity.y = 0f;
+                velocity = RotateVelocityOnSlopes(velocity, hit);
+                
+                if (tryJump)
+                {
+                    velocity.y = jumpForce;
+                }
+            }
+            
+            rb.AddForce(velocity - rb.velocity, ForceMode.VelocityChange);
         }
 
         private void Update()
@@ -154,6 +164,12 @@ namespace Game.Scripts
             if (!isLocalPlayer) return;
 
             camTransform.position = Vector3.Lerp(camTransform.position, playerTransform.position + CameraOffset, cameraFollowSpeed * Time.deltaTime);
+        }
+
+        private static Vector3 RotateVelocityOnSlopes(Vector3 velocity, RaycastHit hit)
+        {
+            Vector3 adjustedVelocity = Quaternion.FromToRotation(Vector3.up, hit.normal) * velocity;
+            return adjustedVelocity;
         }
     }
 }
