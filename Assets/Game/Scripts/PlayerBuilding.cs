@@ -8,6 +8,8 @@ namespace Game.Scripts
     {
         private const float BuildRange = 10f;
         private const float SnapCollisionPadding = 0.5f;
+        // TODO: Change slope shape to be more like "Fortnite" to help with clipping.
+        // Ie: It shouldn't have a base, it should just be the slope part, not half of a cube.
 
         public GameObject[] buildingParts;
         private int selectedPartIndex;
